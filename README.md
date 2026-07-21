@@ -8,7 +8,7 @@
 
 This repo documents a full IT support lab built from scratch: a real helpdesk ticketing system, a Windows Active Directory domain, a Python script that uses the Claude API to auto-triage incoming tickets, and a network troubleshooting lab in Cisco Packet Tracer. The goal is to demonstrate the exact day-to-day skills a Tier 1 / Tier 2 helpdesk role requires — ticketing, account administration, and basic network troubleshooting — plus a modern AI-assisted workflow layered on top.
 
-One project constraint worth calling out: the build runs on an Apple Silicon (M1) Mac, so the Windows Server / Active Directory phase can't run locally in VirtualBox and is instead built on a remote/cloud VM, accessed from this same Mac.
+One project constraint worth calling out: the build runs on an Apple Silicon (M1) Mac, so the Windows Server / Active Directory phase can't run locally in VirtualBox and is instead built on a remote/cloud VM (Azure), accessed from this same Mac via Remote Desktop.
 
 ## Progress
 
@@ -16,7 +16,7 @@ One project constraint worth calling out: the build runs on an Apple Silicon (M1
 |---|---|---|
 | 1 | VirtualBox + Ubuntu Server VM | ✅ Complete |
 | 2 | osTicket helpdesk install | ✅ Complete |
-| 3 | Active Directory domain (Windows Server 2022) | 🔲 Not started |
+| 3 | Active Directory domain (Windows Server 2022) | ✅ Complete |
 | 4 | AI ticket triage with the Claude API | ✅ Complete |
 | 5 | 10 realistic tickets, created & resolved (incl. AD tickets) | 🔲 Not started |
 | 6 | Full portfolio case study document | 🔲 In progress (Phases 1–2 documented so far) |
@@ -47,9 +47,66 @@ Installed a full LAMP stack (Apache, MySQL, PHP) on the Ubuntu VM, then download
 
 ![Terminal log of the SSH and MySQL debugging process](04_terminal_mysql_bash_history_bug_fix.png)
 
-## Phase 3 — Active Directory Domain *(not started)*
+## Phase 3 — Active Directory Domain
 
-Plan: stand up a Windows Server 2022 domain controller (`ukfsupport.local`) on a remote/cloud VM (Apple Silicon can't run Windows Server locally in VirtualBox), build out Organizational Units and security groups for four departments, create 10 employee accounts, and practice the daily Tier 1 tasks — password resets, account unlocks, disabling leavers, and group access changes — in both the GUI (ADUC) and PowerShell.
+Apple Silicon Macs can't run Windows Server locally in VirtualBox (x86_64 guests only run through unsupported, very slow emulation), so this phase runs on a **Windows Server 2022 VM in Azure** instead (free trial, $200/30-day credit), connected to from the Mac via Microsoft Remote Desktop. Everything else — every AD DS step, OU, group, and Tier 1 task — is identical to a local build, just performed over RDP.
+
+**What was built:** a domain controller (`DC01`) promoted to run a new forest, `ukfsupport.local`, with 4 Organizational Units, 4 security groups, and 10 employee accounts — the same structure a small company runs.
+
+![Azure VM networking configuration for DC01 (VNet, subnet, public IP)](07_azure_dc01_networking_config.jpg)
+
+![Active Directory Domain Services role installed on DC01](08_ad_ds_role_install_succeeded.png)
+
+![Server Manager confirming AD DS and DNS roles are live on the domain controller](09_server_manager_ad_dns_roles_confirmed.png)
+
+### Organizational Units & Security Groups
+
+Built out 4 OUs (Management, Sales, IT, Operations) and 4 security groups (Managers, Sales-Team, IT-Admins, All-Staff), then created 10 employee accounts spread across departments, each added to their department group plus All-Staff.
+
+![Active Directory Users and Computers showing the 4 OUs created under ukfsupport.local](10_aduc_ou_structure_created.png)
+
+![A user's Member Of tab showing group membership in All-Staff and IT-Admins](12_group_membership_member_of_tab.png)
+
+### The 4 Daily Tier 1 Tasks
+
+These are the bread-and-butter tickets a real helpdesk handles constantly — genuinely performed against the live domain, not simulated.
+
+**Task A — Password reset**
+
+![Reset Password dialog open for a user](21_password_reset_dialog_open.png)
+![Confirmation that the password was successfully changed](16_password_reset_confirmation.png)
+
+**Task B — Unlock an account**
+
+![Account tab showing the Unlock account checkbox](17_unlock_account_checkbox.png)
+
+**Task C — Disable a leaver** (never delete — preserves the audit trail)
+
+![Disable Account selected from the right-click menu](18_disable_leaver_menu.png)
+![Confirmation that the account object has been disabled](14_disable_leaver_confirmation.png)
+
+**Task D — Group access request** — added a user to a department security group to grant shared-folder access (same mechanism shown in the Member Of screenshot above).
+
+### Bonus: PowerShell administration
+
+Real sysadmins script this instead of clicking through the GUI. Ran the same password-reset-and-unlock workflow via PowerShell:
+
+```powershell
+Set-ADAccountPassword -Identity Rich.man -Reset -NewPassword (ConvertTo-SecureString 'NewPass2026!' -AsPlainText -Force)
+Unlock-ADAccount -Identity Rich.man
+```
+
+![PowerShell running the AD password reset and unlock commands cleanly](20_powershell_ad_success_final.png)
+
+### Problems hit & fixed
+
+- **RDP login failed after domain promotion** — after promoting DC01 to a domain controller, the local `azureuser` account became a *domain* account, so the old plain username no longer authenticated. Fixed by logging in with the domain-qualified form: `UKFSUPPORT\azureuser`.
+
+  ![RDP "credentials did not work" error before finding the domain-qualified username fix](11_rdp_domain_login_troubleshooting.jpg)
+
+- **PowerShell command failed with a parameter-binding error** — pasted two commands at once and they merged onto a single line, so `Set-ADAccountPassword` saw the `-Identity` parameter twice. Fixed by running each command separately, one paste + Enter at a time.
+
+  ![PowerShell ParameterBindingException from two commands merging on paste](19_powershell_bug_troubleshooting.png)
 
 ## Phase 4 — AI Ticket Triage (Claude API)
 
@@ -91,7 +148,7 @@ multiple failed login attempts. I will initiate an account unlock and password r
 right away...
 ```
 
-*(Screenshot of the full terminal run to be added here.)*
+![Terminal output of triage.py classifying all 6 test tickets](06_ai_triage_script_output.png)
 
 ## Phase 5 — Ticket Log *(not started)*
 
@@ -112,7 +169,7 @@ Plan: build a small office network in Cisco Packet Tracer (router, switch, 4 PCs
 - Installing and administering real enterprise-class support software (osTicket — same category as Zendesk/ServiceNow)
 - Comfort in a Linux server environment: package management, permissions, service configuration, and reading logs to debug real errors
 - Practical Python + API integration (Claude API) for automating a real support workflow
-- (Upcoming) Hands-on Active Directory administration — the single most requested skill in helpdesk job postings
+- Hands-on Active Directory administration — the single most requested skill in helpdesk job postings — including building a domain controller from scratch, GUI (ADUC) and PowerShell administration, and real troubleshooting under RDP constraints
 - (Upcoming) Network troubleshooting fundamentals using `ping`, `ipconfig`, and `tracert`
 
 ## Repo Contents
@@ -122,9 +179,23 @@ Plan: build a small office network in Cisco Packet Tracer (router, switch, 4 PCs
 ├── README.md                                  ← this file
 ├── triage.py                                  ← Claude API ticket triage script
 ├── IT_Helpdesk_Progress_Log_Phase1-2.docx     ← detailed Phase 1-2 write-up
-├── 01_virtualbox_ubuntu_vm_running.png
-├── 02_osticket_install_complete.png
-├── 03_osticket_support_center_homepage.png
-├── 04_terminal_mysql_bash_history_bug_fix.png
-└── 05_osticket_admin_panel_first_ticket.png
+├── 01_virtualbox_ubuntu_vm_running.png        ← Phase 1
+├── 02_osticket_install_complete.png           ← Phase 2
+├── 03_osticket_support_center_homepage.png    ← Phase 2
+├── 04_terminal_mysql_bash_history_bug_fix.png ← Phase 2
+├── 05_osticket_admin_panel_first_ticket.png   ← Phase 2
+├── 06_ai_triage_script_output.png             ← Phase 4
+├── 07_azure_dc01_networking_config.jpg        ← Phase 3
+├── 08_ad_ds_role_install_succeeded.png        ← Phase 3
+├── 09_server_manager_ad_dns_roles_confirmed.png ← Phase 3
+├── 10_aduc_ou_structure_created.png           ← Phase 3
+├── 11_rdp_domain_login_troubleshooting.jpg    ← Phase 3
+├── 12_group_membership_member_of_tab.png      ← Phase 3
+├── 14_disable_leaver_confirmation.png         ← Phase 3
+├── 16_password_reset_confirmation.png         ← Phase 3
+├── 17_unlock_account_checkbox.png             ← Phase 3
+├── 18_disable_leaver_menu.png                 ← Phase 3
+├── 19_powershell_bug_troubleshooting.png      ← Phase 3
+├── 20_powershell_ad_success_final.png         ← Phase 3
+└── 21_password_reset_dialog_open.png          ← Phase 3
 ```
