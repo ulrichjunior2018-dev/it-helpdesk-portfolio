@@ -18,8 +18,8 @@ One project constraint worth calling out: the build runs on an Apple Silicon (M1
 | 2 | osTicket helpdesk install | ✅ Complete |
 | 3 | Active Directory domain (Windows Server 2022) | ✅ Complete |
 | 4 | AI ticket triage with the Claude API | ✅ Complete |
-| 5 | 10 realistic tickets, created & resolved (incl. AD tickets) | 🔲 Not started |
-| 6 | Full portfolio case study document | 🔲 In progress (Phases 1–2 documented so far) |
+| 5 | 10 realistic tickets, created & resolved (incl. AD tickets) | ✅ Complete |
+| 6 | Full portfolio case study document | 🔲 In progress (this README is the living version) |
 | 7 | Network troubleshooting lab (Cisco Packet Tracer) | 🔲 Not started |
 
 ---
@@ -150,13 +150,47 @@ right away...
 
 ![Terminal output of triage.py classifying all 6 test tickets](06_ai_triage_script_output.png)
 
-## Phase 5 — Ticket Log *(not started)*
+## Phase 5 — Ticket Log
 
-Plan: submit 10 realistic tickets into osTicket spanning Critical → Low priority, run each through `triage.py`, and resolve them with professional notes. Four tickets will get real fixes performed inside the Active Directory lab (account unlock, new-hire provisioning, group access grant, and disabling a leaver).
+Submitted 10 realistic tickets through the public osTicket Support Center — the same way a real employee would email or call in an issue — then worked each one from the staff panel exactly like a Tier 1 agent on shift: read it, triage it, fix it or escalate it, and close it out with a note explaining what was done. Four of the ten needed genuine hands-on-keyboard fixes inside the Active Directory lab, not just a written reply.
+
+| Ticket # | Issue | Category | Priority | Resolution |
+|---|---|---|---|---|
+| 685881 | Server is down, entire office cannot work | Network | Critical | Walked through outage triage steps and confirmed systems back online; closed with full explanation |
+| 814906 | My account is locked out | Account | High | **Real AD fix** — unlocked the account and reset the password in Active Directory Users and Computers |
+| 561107 | Cannot connect to company VPN from home | Network | High | Guided the user through re-establishing the VPN connection; closed |
+| 955831 | New employee needs account setup | Account | Medium | **Real AD fix** — created the new-hire account in the Sales OU and added it to the Sales-Team and All-Staff security groups |
+| 151388 | Need access to Sales shared folder | Account | Medium | **Real AD fix** — added the user to the Sales-Team security group, granting shared-folder access |
+| 887867 | Word keeps freezing on save | Software | Low | Standard software troubleshooting steps provided; closed |
+| 761746 | Employee left company, account needs securing | Account | High | **Real AD fix** — disabled the leaver's AD account (never deleted, so the audit trail stays intact) |
+| 271678 | Email inbox full | Software | Low | Walked the user through clearing/archiving mail; closed |
+| 696430 | Printer making grinding noise | Hardware | Low | Logged as a hardware issue for physical repair/dispatch; closed |
+
+Every ticket went through the same lifecycle a real helpdesk uses: **Open → worked (internal note + user-facing reply) → Resolved → Closed.** Internal notes documented the technical steps taken; the public reply told the employee, in plain language, what was fixed.
+
+![osTicket mid-resolution — 6 tickets still open before the AD fixes were performed](22_osticket_open_tickets_midway.png)
+
+**Real AD Task 1 — New hire provisioning:** created the account and added it to the right groups so a new employee shows up with working access on day one — the exact same task that opens a corporate onboarding checklist everywhere.
+
+![New-hire account added to All-Staff, Domain Users, and Sales-Team](23_aduc_sophie_martin_new_hire_groups.png)
+
+**Real AD Task 2 — Group access grant:** rather than sharing a password or copying files, added the requesting user to the Sales-Team security group — the correct, auditable way to hand out shared-folder access.
+
+![User added to the Sales-Team security group to grant shared folder access](24_aduc_rich_man_group_access_grant.png)
+
+**Real AD Task 3 — Disabling a leaver:** when someone leaves the company, the account gets disabled immediately (not deleted) — this keeps the audit trail intact while shutting off all access the moment they walk out the door.
+
+![Confirmation dialog: leaver's account object has been disabled](25_aduc_leaver_account_disabled.png)
+
+**Real AD Task 4 — Account unlock + password reset:** the single most common Tier 1 ticket in any company — someone mistypes their password too many times, gets locked out, and needs back in fast.
+
+All 10 tickets closed out and verified in the queue:
+
+![All 10 tickets showing Closed status with resolution notes](26_osticket_closed_tickets_final.png)
 
 ## Phase 6 — Case Study Document *(in progress)*
 
-This README is the living version of the portfolio case study. A polished PDF version (with all screenshots, the full ticket log, and lessons learned) will be exported once Phases 3, 5, and 7 are complete.
+This README is the living version of the portfolio case study. A polished PDF version (with all screenshots, the full ticket log, and lessons learned) will be exported once Phase 7 is complete.
 
 ## Phase 7 — Network Troubleshooting Lab *(not started)*
 
@@ -170,6 +204,7 @@ Plan: build a small office network in Cisco Packet Tracer (router, switch, 4 PCs
 - Comfort in a Linux server environment: package management, permissions, service configuration, and reading logs to debug real errors
 - Practical Python + API integration (Claude API) for automating a real support workflow
 - Hands-on Active Directory administration — the single most requested skill in helpdesk job postings — including building a domain controller from scratch, GUI (ADUC) and PowerShell administration, and real troubleshooting under RDP constraints
+- Full ticket lifecycle management — triage, prioritization, resolution, and clear closing communication — across 10 realistic tickets, 4 of which required genuine account/directory changes rather than just a written reply
 - (Upcoming) Network troubleshooting fundamentals using `ping`, `ipconfig`, and `tracert`
 
 ## Repo Contents
@@ -197,5 +232,10 @@ Plan: build a small office network in Cisco Packet Tracer (router, switch, 4 PCs
 ├── 18_disable_leaver_menu.png                 ← Phase 3
 ├── 19_powershell_bug_troubleshooting.png      ← Phase 3
 ├── 20_powershell_ad_success_final.png         ← Phase 3
-└── 21_password_reset_dialog_open.png          ← Phase 3
+├── 21_password_reset_dialog_open.png          ← Phase 3
+├── 22_osticket_open_tickets_midway.png        ← Phase 5
+├── 23_aduc_sophie_martin_new_hire_groups.png  ← Phase 5
+├── 24_aduc_rich_man_group_access_grant.png    ← Phase 5
+├── 25_aduc_leaver_account_disabled.png        ← Phase 5
+└── 26_osticket_closed_tickets_final.png       ← Phase 5
 ```
