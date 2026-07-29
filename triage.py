@@ -23,16 +23,20 @@ Ticket: {ticket_text}'''
             return block.text
     return '(no text response)'
 
-test_tickets = [
-    'My laptop screen went black and wont turn on',
-    'My account is locked out after too many password attempts',
-    'New hire starting Monday, needs an AD account and email',
-    'I need access to the Sales shared folder',
-    'The internet is really slow today in the office',
-    'Excel keeps crashing when I open large files',
+phase5_tickets = [
+    'Server is down, entire office cannot work. All systems offline.',
+    'My account is locked, I cannot log in and I have a deadline.',
+    'Cannot connect to company VPN from home.',
+    'New employee Marie Ngassa starts Monday — needs account, email, and Sales access.',
+    'I need access to the Sales shared folder for a project.',
+    'Microsoft Word keeps freezing when saving documents.',
+    'Employee in Operations left the company Friday — account needs to be secured.',
+    'My email inbox is full, cannot receive new messages.',
+    'Please update my display name in the company directory.',
+    'The office printer is making a grinding noise.',
 ]
 
-for ticket in test_tickets:
-    print(f'TICKET: {ticket}')
+for i, ticket in enumerate(phase5_tickets, start=1):
+    print(f'TICKET {i}: {ticket}')
     print(triage_ticket(ticket))
     print('-' * 50)
